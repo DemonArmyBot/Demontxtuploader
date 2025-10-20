@@ -95,7 +95,7 @@ def pinger(url, interval=300, retries=3):  # Ping every 5 minutes
     time.sleep(interval)
 
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 8181))
     
     # REPLACE WITH YOUR ACTUAL DEPLOYED URL
     deployed_url = 'https://demontxtuploader.onrender.com'  # e.g., https://sudosr2spr.onrender.com
