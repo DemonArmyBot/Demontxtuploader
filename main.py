@@ -618,15 +618,22 @@ async def txt_handler(bot: Client, m: Message):
             else:
                 ytf = f"b[height<={raw_text2}]/bv[height<={raw_text2}]+ba/b/bv+ba"
            
-            if "apps-s3-prod.utkarshapp.com" in url or "apps-s3-jw-prod.utkarshapp.com" in url:
-                # sanitize name for safe filenames
-                safe_name = re.sub(r'[^\w\s-]', '', name).strip()[:50]
-                utkarsh_headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Referer': 'https://utkarshapp.com/',
-                    'Accept': '*/*',
-                }
-                try:
+
+            try:
+                cc = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**🎞️ Title :** `{name1}`\n**├── Extention :**  {CR} .mkv\n**├── Resolution :** [{res}]\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
+                cc1 = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**📁 Title :** `{name1}`\n**├── Extention :**  {CR} .pdf\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
+                cczip = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**📁 Title :** `{name1}`\n**├── Extention :**  {CR} .zip\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
+                ccimg = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**🖼️ Title :** `{name1}`\n**├── Extention :**  {CR} .jpg\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
+                ccm = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**🎵 Title :** `{name1}`\n**├── Extention :**  {CR} .mp3\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
+                cchtml = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**🌐 Title :** `{name1}`\n**├── Extention :**  {CR} .html\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
+
+                if "apps-s3-prod.utkarshapp.com" in url or "apps-s3-jw-prod.utkarshapp.com" in url:
+                    safe_name = re.sub(r'[^\w\s-]', '', name).strip()[:50]
+                    utkarsh_headers = {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Referer': 'https://utkarshapp.com/',
+                        'Accept': '*/*',
+                    }
                     if any(e in url.lower() for e in ['.jpeg', '.jpg', '.png']):
                         scraper = cloudscraper.create_scraper()
                         response = scraper.get(url, headers=utkarsh_headers)
@@ -639,7 +646,6 @@ async def txt_handler(bot: Client, m: Message):
                             os.remove(img_path)
                         else:
                             await m.reply_text(f"❌ Image Failed: {response.status_code}")
-
                     elif '.pdf' in url or '/pdf/' in url:
                         scraper = cloudscraper.create_scraper()
                         response = scraper.get(url, headers=utkarsh_headers)
@@ -652,16 +658,15 @@ async def txt_handler(bot: Client, m: Message):
                             os.remove(pdf_path)
                         else:
                             await m.reply_text(f"❌ PDF Failed: {response.status_code}")
-
                     elif '.ws' in url or '/notes/' in url:
                         html_path = f'{safe_name}.html'
                         await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}", html_path)
                         await bot.send_document(chat_id=m.chat.id, document=html_path, caption=cchtml)
                         os.remove(html_path)
                         count += 1
-
                     elif 'enc_plain_mp4' in url or url.endswith('.mp4'):
                         url = re.sub(r'\d+x\d+', res, url)
+                        safe_name = re.sub(r'[^\w\s-]', '', name).strip()[:50]
                         mp4_path = f'{safe_name}.mp4'
                         cmd = f'yt-dlp --add-header "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" --add-header "Referer: https://utkarshapp.com/" -o "{mp4_path}" "{url}"'
                         res_file = await helper.download_video(url, cmd, mp4_path)
@@ -670,37 +675,7 @@ async def txt_handler(bot: Client, m: Message):
                         await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
                         count += 1
 
-                except Exception as e:
-                    await m.reply_text(f"❌ Utkarsh Error: {str(e)}")
-                continue
-
-            elif "apps-s3-jw-prod.utkarshapp.com" in url:
-                if 'enc_plain_mp4' in url:
-                    url = re.sub(r'\d+x\d+', res, url)
-                    cmd = f'yt-dlp --add-header "User-Agent: Mozilla/5.0" --add-header "Referer: https://utkarshapp.com/" -o "{name}.mp4" "{url}"'
-                elif 'Key-Pair-Id' in url:
-                    url = None
-                elif '.m3u8' in url:
-                    cmd = f'yt-dlp -f "{ytf}" --add-header "Referer: https://utkarshapp.com/" -o "{name}.mp4" "{url}"'
-
-            elif "jw-prod" in url:
-                cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
-            elif "webvideos.classplusapp." in url:
-               cmd = f'yt-dlp --add-header "referer:https://web.classplusapp.com/" --add-header "x-cdn-tag:empty" -f "{ytf}" "{url}" -o "{name}.mp4"'
-            elif "youtube.com" in url or "youtu.be" in url:
-                cmd = f'yt-dlp --cookies youtube_cookies.txt -f "{ytf}" "{url}" -o "{name}".mp4'
-            else:
-                cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
-
-            try:
-                cc = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**🎞️ Title :** `{name1}`\n**├── Extention :**  {CR} .mkv\n**├── Resolution :** [{res}]\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
-                cc1 = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**📁 Title :** `{name1}`\n**├── Extention :**  {CR} .pdf\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
-                cczip = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**📁 Title :** `{name1}`\n**├── Extention :**  {CR} .zip\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
-                ccimg = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**🖼️ Title :** `{name1}`\n**├── Extention :**  {CR} .jpg\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
-                ccm = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**🎵 Title :** `{name1}`\n**├── Extention :**  {CR} .mp3\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
-                cchtml = f'[——— ✦ {str(count).zfill(3)} ✦ ———]({link0})\n\n**🌐 Title :** `{name1}`\n**├── Extention :**  {CR} .html\n\n**📚 Course :** {b_name}\n\n**🌟 Extracted By :** {CR}'
-
-                if "drive" in url:
+                elif "drive" in url:
                     try:
                         ka = await helper.download(url, name)
                         copy = await bot.send_document(chat_id=m.chat.id,document=ka, caption=cc1)
@@ -795,7 +770,7 @@ async def txt_handler(bot: Client, m: Message):
                         cmd = f'yt-dlp -o "{name}.{ext}" "{url}"'
                         download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                         os.system(download_cmd)
-                        copy = await bot.send_photo(chat_id=m.chat.d, photo=f'{name}.{ext}', caption=ccimg)
+                        copy = await bot.send_photo(chat_id=m.chat.id, photo=f'{name}.{ext}', caption=ccimg)
                         count += 1
                         os.remove(f'{name}.{ext}')
                     except FloodWait as e:
@@ -1039,15 +1014,20 @@ async def text_handler(bot: Client, m: Message):
             else:
                 ytf = f"b[height<={raw_text2}]/bv[height<={raw_text2}]+ba/b/bv+ba"
            
-            if "apps-s3-prod.utkarshapp.com" in url or "apps-s3-jw-prod.utkarshapp.com" in url:
-                # sanitize name for safe filenames
-                safe_name = re.sub(r'[^\w\s-]', '', name).strip()[:50]
-                utkarsh_headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Referer': 'https://utkarshapp.com/',
-                    'Accept': '*/*',
-                }
-                try:
+
+            try:
+                cc = f'🎞️𝐓𝐢𝐭𝐥𝐞 » `{name} [{res}].mp4`\n🔗𝐋𝐢𝐧𝐤 » <a href="{link}">__**CLICK HERE**__</a>\n\n🌟𝐄𝐱𝐭𝐫𝐚𝐜𝐭𝐞𝐝 𝐁𝐲 » `{CREDIT}`'
+                cc1 = f'📕𝐓𝐢𝐭𝐥𝐞 » `{name}`\n🔗𝐋𝐢𝐧𝐤 » <a href="{link}">__**CLICK HERE**__</a>\n\n🌟𝐄𝐱𝐭𝐫𝐚𝐜𝐭𝐞𝐝 𝐁𝐲 » `{CREDIT}`'
+                ccimg = f'🖼️𝐓𝐢𝐭𝐥𝐞 » `{name}`\n🔗𝐋𝐢𝐧𝐤 » <a href="{link}">__**CLICK HERE**__</a>\n\n🌟𝐄𝐱𝐭𝐫𝐚𝐜𝐭𝐞𝐝 𝐁𝐲 » `{CREDIT}`'
+                cchtml = f'🌐𝐓𝐢𝐭𝐥𝐞 » `{name}`\n🔗𝐋𝐢𝐧𝐤 » <a href="{link}">__**CLICK HERE**__</a>\n\n🌟𝐄𝐱𝐭𝐫𝐚𝐜𝐭𝐞𝐝 𝐁𝐲 » `{CREDIT}`'
+
+                if "apps-s3-prod.utkarshapp.com" in url or "apps-s3-jw-prod.utkarshapp.com" in url:
+                    safe_name = re.sub(r'[^\w\s-]', '', name).strip()[:50]
+                    utkarsh_headers = {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Referer': 'https://utkarshapp.com/',
+                        'Accept': '*/*',
+                    }
                     if any(e in url.lower() for e in ['.jpeg', '.jpg', '.png']):
                         scraper = cloudscraper.create_scraper()
                         response = scraper.get(url, headers=utkarsh_headers)
@@ -1060,7 +1040,6 @@ async def text_handler(bot: Client, m: Message):
                             os.remove(img_path)
                         else:
                             await m.reply_text(f"❌ Image Failed: {response.status_code}")
-
                     elif '.pdf' in url or '/pdf/' in url:
                         scraper = cloudscraper.create_scraper()
                         response = scraper.get(url, headers=utkarsh_headers)
@@ -1073,14 +1052,12 @@ async def text_handler(bot: Client, m: Message):
                             os.remove(pdf_path)
                         else:
                             await m.reply_text(f"❌ PDF Failed: {response.status_code}")
-
                     elif '.ws' in url or '/notes/' in url:
                         html_path = f'{safe_name}.html'
                         await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}", html_path)
                         await bot.send_document(chat_id=m.chat.id, document=html_path, caption=cchtml)
                         os.remove(html_path)
                         count += 1
-
                     elif 'enc_plain_mp4' in url or url.endswith('.mp4'):
                         url = re.sub(r'\d+x\d+', res, url)
                         mp4_path = f'{safe_name}.mp4'
@@ -1091,33 +1068,7 @@ async def text_handler(bot: Client, m: Message):
                         await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
                         count += 1
 
-                except Exception as e:
-                    await m.reply_text(f"❌ Utkarsh Error: {str(e)}")
-                continue
-
-            elif "apps-s3-jw-prod.utkarshapp.com" in url:
-                if 'enc_plain_mp4' in url:
-                    url = re.sub(r'\d+x\d+', res, url)
-                    cmd = f'yt-dlp --add-header "User-Agent: Mozilla/5.0" --add-header "Referer: https://utkarshapp.com/" -o "{name}.mp4" "{url}"'
-                elif 'Key-Pair-Id' in url:
-                    url = None
-                elif '.m3u8' in url:
-                    cmd = f'yt-dlp -f "{ytf}" --add-header "Referer: https://utkarshapp.com/" -o "{name}.mp4" "{url}"'
-
-            elif "jw-prod" in url:
-                cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
-            elif "webvideos.classplusapp." in url:
-               cmd = f'yt-dlp --add-header "referer:https://web.classplusapp.com/" --add-header "x-cdn-tag:empty" -f "{ytf}" "{url}" -o "{name}.mp4"'
-            elif "youtube.com" in url or "youtu.be" in url:
-                cmd = f'yt-dlp --cookies youtube_cookies.txt -f "{ytf}" "{url}" -o "{name}".mp4'
-            else:
-                cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'
-
-            try:
-                cc = f'🎞️𝐓𝐢𝐭𝐥𝐞 » `{name} [{res}].mp4`\n🔗𝐋𝐢𝐧𝐤 » <a href="{link}">__**CLICK HERE**__</a>\n\n🌟𝐄𝐱𝐭𝐫𝐚𝐜𝐭𝐞𝐝 𝐁𝐲 » `{CREDIT}`'
-                cc1 = f'📕𝐓𝐢𝐭𝐥𝐞 » `{name}`\n🔗𝐋𝐢𝐧𝐤 » <a href="{link}">__**CLICK HERE**__</a>\n\n🌟𝐄𝐱𝐭𝐫𝐚𝐜𝐭𝐞𝐝 𝐁𝐲 » `{CREDIT}`'
-                  
-                if "drive" in url:
+                elif "drive" in url:
                     try:
                         ka = await helper.download(url, name)
                         copy = await bot.send_document(chat_id=m.chat.id,document=ka, caption=cc1)
