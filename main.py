@@ -618,7 +618,9 @@ async def txt_handler(bot: Client, m: Message):
             else:
                 ytf = f"b[height<={raw_text2}]/bv[height<={raw_text2}]+ba/b/bv+ba"
            
-            if "apps-s3-prod.utkarshapp.com" in url:
+            if "apps-s3-prod.utkarshapp.com" in url or "apps-s3-jw-prod.utkarshapp.com" in url:
+                # sanitize name for safe filenames
+                safe_name = re.sub(r'[^\w\s-]', '', name).strip()[:50]
                 utkarsh_headers = {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Referer': 'https://utkarshapp.com/',
@@ -629,36 +631,45 @@ async def txt_handler(bot: Client, m: Message):
                         scraper = cloudscraper.create_scraper()
                         response = scraper.get(url, headers=utkarsh_headers)
                         if response.status_code == 200:
-                            with open(f'{name}.jpg', 'wb') as file:
+                            img_path = f'{safe_name}.jpg'
+                            with open(img_path, 'wb') as file:
                                 file.write(response.content)
-                            await bot.send_photo(chat_id=m.chat.id, photo=f'{name}.jpg', caption=ccimg)
+                            await bot.send_photo(chat_id=m.chat.id, photo=img_path, caption=ccimg)
                             count += 1
-                            os.remove(f'{name}.jpg')
+                            os.remove(img_path)
                         else:
                             await m.reply_text(f"❌ Image Failed: {response.status_code}")
+
                     elif '.pdf' in url or '/pdf/' in url:
                         scraper = cloudscraper.create_scraper()
                         response = scraper.get(url, headers=utkarsh_headers)
                         if response.status_code == 200:
-                            with open(f'{name}.pdf', 'wb') as file:
+                            pdf_path = f'{safe_name}.pdf'
+                            with open(pdf_path, 'wb') as file:
                                 file.write(response.content)
-                            await bot.send_document(chat_id=m.chat.id, document=f'{name}.pdf', caption=cc1)
+                            await bot.send_document(chat_id=m.chat.id, document=pdf_path, caption=cc1)
                             count += 1
-                            os.remove(f'{name}.pdf')
+                            os.remove(pdf_path)
                         else:
                             await m.reply_text(f"❌ PDF Failed: {response.status_code}")
+
                     elif '.ws' in url or '/notes/' in url:
-                        await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}", f"{name}.html")
-                        await bot.send_document(chat_id=m.chat.id, document=f'{name}.html', caption=cchtml)
-                        os.remove(f'{name}.html')
+                        html_path = f'{safe_name}.html'
+                        await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}", html_path)
+                        await bot.send_document(chat_id=m.chat.id, document=html_path, caption=cchtml)
+                        os.remove(html_path)
                         count += 1
+
                     elif 'enc_plain_mp4' in url or url.endswith('.mp4'):
                         url = re.sub(r'\d+x\d+', res, url)
-                        cmd = f'yt-dlp --add-header "User-Agent: Mozilla/5.0" --add-header "Referer: https://utkarshapp.com/" -o "{name}.mp4" "{url}"'
-                        res_file = await helper.download_video(url, cmd, name)
+                        mp4_path = f'{safe_name}.mp4'
+                        cmd = f'yt-dlp --add-header "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" --add-header "Referer: https://utkarshapp.com/" -o "{mp4_path}" "{url}"'
+                        res_file = await helper.download_video(url, cmd, mp4_path)
                         filename = res_file
-                        await helper.send_vid(bot, m, cc, filename, thumb, name, None)
+                        prog = await m.reply_text(f"⬆️ Uploading: `{name}`")
+                        await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
                         count += 1
+
                 except Exception as e:
                     await m.reply_text(f"❌ Utkarsh Error: {str(e)}")
                 continue
@@ -1028,7 +1039,9 @@ async def text_handler(bot: Client, m: Message):
             else:
                 ytf = f"b[height<={raw_text2}]/bv[height<={raw_text2}]+ba/b/bv+ba"
            
-            if "apps-s3-prod.utkarshapp.com" in url:
+            if "apps-s3-prod.utkarshapp.com" in url or "apps-s3-jw-prod.utkarshapp.com" in url:
+                # sanitize name for safe filenames
+                safe_name = re.sub(r'[^\w\s-]', '', name).strip()[:50]
                 utkarsh_headers = {
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Referer': 'https://utkarshapp.com/',
@@ -1039,36 +1052,45 @@ async def text_handler(bot: Client, m: Message):
                         scraper = cloudscraper.create_scraper()
                         response = scraper.get(url, headers=utkarsh_headers)
                         if response.status_code == 200:
-                            with open(f'{name}.jpg', 'wb') as file:
+                            img_path = f'{safe_name}.jpg'
+                            with open(img_path, 'wb') as file:
                                 file.write(response.content)
-                            await bot.send_photo(chat_id=m.chat.id, photo=f'{name}.jpg', caption=ccimg)
+                            await bot.send_photo(chat_id=m.chat.id, photo=img_path, caption=ccimg)
                             count += 1
-                            os.remove(f'{name}.jpg')
+                            os.remove(img_path)
                         else:
                             await m.reply_text(f"❌ Image Failed: {response.status_code}")
+
                     elif '.pdf' in url or '/pdf/' in url:
                         scraper = cloudscraper.create_scraper()
                         response = scraper.get(url, headers=utkarsh_headers)
                         if response.status_code == 200:
-                            with open(f'{name}.pdf', 'wb') as file:
+                            pdf_path = f'{safe_name}.pdf'
+                            with open(pdf_path, 'wb') as file:
                                 file.write(response.content)
-                            await bot.send_document(chat_id=m.chat.id, document=f'{name}.pdf', caption=cc1)
+                            await bot.send_document(chat_id=m.chat.id, document=pdf_path, caption=cc1)
                             count += 1
-                            os.remove(f'{name}.pdf')
+                            os.remove(pdf_path)
                         else:
                             await m.reply_text(f"❌ PDF Failed: {response.status_code}")
+
                     elif '.ws' in url or '/notes/' in url:
-                        await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}", f"{name}.html")
-                        await bot.send_document(chat_id=m.chat.id, document=f'{name}.html', caption=cchtml)
-                        os.remove(f'{name}.html')
+                        html_path = f'{safe_name}.html'
+                        await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}", html_path)
+                        await bot.send_document(chat_id=m.chat.id, document=html_path, caption=cchtml)
+                        os.remove(html_path)
                         count += 1
+
                     elif 'enc_plain_mp4' in url or url.endswith('.mp4'):
                         url = re.sub(r'\d+x\d+', res, url)
-                        cmd = f'yt-dlp --add-header "User-Agent: Mozilla/5.0" --add-header "Referer: https://utkarshapp.com/" -o "{name}.mp4" "{url}"'
-                        res_file = await helper.download_video(url, cmd, name)
+                        mp4_path = f'{safe_name}.mp4'
+                        cmd = f'yt-dlp --add-header "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)" --add-header "Referer: https://utkarshapp.com/" -o "{mp4_path}" "{url}"'
+                        res_file = await helper.download_video(url, cmd, mp4_path)
                         filename = res_file
-                        await helper.send_vid(bot, m, cc, filename, thumb, name, None)
+                        prog = await m.reply_text(f"⬆️ Uploading: `{name}`")
+                        await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
                         count += 1
+
                 except Exception as e:
                     await m.reply_text(f"❌ Utkarsh Error: {str(e)}")
                 continue
